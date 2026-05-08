@@ -3,14 +3,65 @@
   "version": "0.0.0",
   "description": "an opinionated event-driven framework for building asynchronous systems on aws.",
   "type": "module",
-  "scripts": {
-    "start": "tsx src/index.ts"
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
   },
   "author": "mcking-07",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mcking-07/eventing-framework.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mcking-07/eventing-framework/issues"
+  },
+  "homepage": "https://github.com/mcking-07/eventing-framework#readme",
+  "keywords": [
+    "event-driven",
+    "framework",
+    "aws",
+    "sns",
+    "sqs",
+    "s3"
+  ],
+  "files": ["dist"],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsup",
+    "ci": "npm run lint && npm run test && npm run build",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "tsx --test",
+    "test:coverage": "tsx --experimental-test-coverage --test"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.1053.0",
+    "@aws-sdk/client-sns": "3.1053.0",
+    "@aws-sdk/client-sqs": "3.1053.0",
+    "safe-wrapper": "4.2.0",
+    "uuid": "14.0.0",
+    "winston": "3.19.0"
+  },
   "devDependencies": {
-    "@types/node": "25.0.3",
-    "tsx": "4.21.0",
-    "typescript": "5.9.3"
+    "@eslint/js": "10.0.1",
+    "@types/node": "25.9.1",
+    "@types/sinon": "21.0.1",
+    "eslint": "10.4.0",
+    "globals": "17.6.0",
+    "jiti": "2.7.0",
+    "sinon": "22.0.0",
+    "tsup": "8.5.1",
+    "tsx": "4.22.3",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.59.4"
   }
 }
