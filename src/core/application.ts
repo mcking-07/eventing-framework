@@ -38,6 +38,7 @@ class Application<Events extends Record<string, GenericPayloadType>> {
   }
 
   public on<Event extends keyof Events>(event: Event, handler: HandlerType<Events[Event]>): void;
+  public on<PayloadType>(event: string, handler: HandlerType<PayloadType>): void;
   public on<PayloadType>(event: string, handler: HandlerType<PayloadType>): void {
     if (this.handlers.has(event)) {
       logger.error(`[-] event [${event}] is already registered for consumption in [${this.name}] application`);
@@ -123,7 +124,7 @@ class Application<Events extends Record<string, GenericPayloadType>> {
     return await this.storage.get(pointer);
   }
 
-  public async poll(): Promise<void> {
+  private async poll(): Promise<void> {
     if (!this.queue) {
       logger.error(`[!] queue client not configured for [${this.name}] application, cannot poll`);
       throw new QueueConfigUndefined(`queue configs undefined for [${this.name}] application`);
