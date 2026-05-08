@@ -12,7 +12,7 @@ class TaskScheduler {
   }
 
   public schedule(name: string, task: TaskType): void {
-    logger.info(`[+] scheduling task [${name}] to run every [${this.interval}] ms`);
+    logger.info(`[~] scheduling task [${name}] to run every [${this.interval}] ms`);
     this.timer = setInterval(() => void safe(task)(), this.interval);
   }
 

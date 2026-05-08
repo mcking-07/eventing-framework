@@ -21,7 +21,7 @@ class EventPublisher {
   }
 
   private static wrapped = <EventType extends DomainEvent>(handler: EventHandler<EventType>) => (event: EventType) => {
-    logger.info(`received event [${event.name}] for handler [${handler.name}] with payload:`, event?.payload);
+    logger.info(`[~] received event [${event.name}] with payload:`, event?.payload);
     return handler(event);
   };
 }

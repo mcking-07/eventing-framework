@@ -63,7 +63,7 @@ class Application<Events extends Record<string, GenericPayloadType>> {
     const { name, payload: { app = APP_NAME_UNDEFINED, category = CATEGORY_UNDEFINED, ...payload } = {} } = event || {};
     const metadata = { App: app, Category: category, EventName: name };
 
-    logger.info(`[~] preparing event [${name}] for emission with metadata:`, metadata);
+    logger.info(`[~] preparing event [${name}] for emission`);
     return { metadata, name, payload };
   }
 
@@ -115,7 +115,7 @@ class Application<Events extends Record<string, GenericPayloadType>> {
     }
 
     if (!pointer) {
-      logger.error(`[!] missing storage reference for event [${name}] in message`);
+      logger.error(`[!] missing storage reference for event [${name}] in message, cannot resolve reference`);
       throw new StorageReferenceUndefined(`storage reference undefined for event [${name}] in message`);
     }
 

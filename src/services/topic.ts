@@ -21,15 +21,13 @@ class TopicClient {
   }
 
   private attributes(records: PreMessageAttributes) {
-    logger.info(`[~] building message attributes for [${Object.keys(records).length}] metadata keys`);
-
     return Object.entries(records).reduce<MessageAttributes>((attrs, [key, value]) => ({
       ...attrs, [key]: { DataType: 'String', StringValue: value }
     }), {});
   }
 
   public async publish(message: string, metadata: PreMessageAttributes = {}) {
-    logger.info(`[~] publishing message with [${Object.keys(metadata).length}] custom attributes`);
+    logger.info('[~] publishing message to topic with metadata:', metadata);
 
     const command = new PublishCommand({
       ...this.params, Message: message, MessageAttributes: { ...this.params?.MessageAttributes, ...this.attributes(metadata) }, TopicArn: this.arn,
