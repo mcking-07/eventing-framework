@@ -1,0 +1,16 @@
+{
+  "name": "eventing-framework",
+  "version": "0.0.0",
+  "description": "an opinionated event-driven framework for building asynchronous systems on aws.",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts"
+  },
+  "author": "mcking-07",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "25.0.3",
+    "tsx": "4.21.0",
+    "typescript": "5.9.3"
+  }
+}
