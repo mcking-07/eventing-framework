@@ -1,6 +1,6 @@
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { v7 as uuid } from 'uuid';
-import { loggerFor } from '../common';
+import { loggerFor, safe } from '../common';
 import { EmptyResponseFromStore } from '../errors';
 import type { StorageConfig, StoragePayload } from '../types';
 
@@ -19,12 +19,19 @@ class ObjectStore {
     const command = new GetObjectCommand({ Bucket: this.bucket, Key: key });
     logger.info(`[~] fetching object for key [${key}]`);
 
-    const { Body: body } = await this.client.send(command);
+    const [error, response] = await safe(async () => this.client.send(command))();
+
+    if (error || !response) {
+      logger.error(`[!] failed to fetch object from store for key [${key}] from bucket [${this.bucket}] with ${error?.message || 'unknown error'}`);
+      throw new EmptyResponseFromStore(`failed to fetch object from store for key [${key}] from bucket [${this.bucket}]`, { error });
+    }
+
+    const { Body: body } = response;
     const payload = await body?.transformToString();
 
     if (!payload) {
-      logger.error(`[!] empty response from store for key [${key}] from bucket [${this.bucket}]`);
-      throw new EmptyResponseFromStore(`empty response from store for key [${key}] from bucket [${this.bucket}]`);
+      logger.error(`[!] empty response for key [${key}] from bucket [${this.bucket}]`);
+      throw new EmptyResponseFromStore(`empty response for key [${key}] from bucket [${this.bucket}]`);
     }
 
     logger.info(`[+] fetched object for key [${key}]`);
