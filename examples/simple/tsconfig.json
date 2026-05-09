@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "lib": ["esnext"],
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "strict": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "verbatimModuleSyntax": true,
+    "esModuleInterop": true,
+    "types": ["node"]
+  },
+  "include": ["index.ts", "common/**/*", "infrastructure/**/*", "order-service/**/*", "notification-service/**/*"]
+}

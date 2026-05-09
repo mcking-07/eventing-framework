@@ -1,0 +1,16 @@
+{
+  "name": "eventing-framework-example-simple",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "demo": "tsx index.ts"
+  },
+  "dependencies": {
+    "eventing-framework": "file:../.."
+  },
+  "devDependencies": {
+    "@types/node": "25.9.1",
+    "tsx": "4.22.3"
+  }
+}
