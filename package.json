@@ -31,7 +31,13 @@
     "sqs",
     "s3"
   ],
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "engines": {
     "node": ">=20"
   },
@@ -41,7 +47,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "tsx --test",
-    "test:coverage": "tsx --experimental-test-coverage --test"
+    "test:coverage": "tsx --experimental-test-coverage --test",
+    "prepublishOnly": "npm run ci"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1053.0",
