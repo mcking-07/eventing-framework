@@ -1,12 +1,17 @@
 # eventing-framework
 
+[![ci](https://github.com/mcking-07/eventing-framework/workflows/publish/badge.svg)](https://github.com/mcking-07/eventing-framework/actions)
+[![npm version](https://img.shields.io/npm/v/eventing-framework.svg)](https://www.npmjs.com/package/eventing-framework)
+[![license](https://img.shields.io/npm/l/eventing-framework.svg)](https://github.com/mcking-07/eventing-framework/blob/main/LICENSE)
+[![aws](https://img.shields.io/badge/aws-SNS%20%7C%20SQS%20%7C%20S3-orange?logo=amazonwebservices&logoColor=white)](https://aws.amazon.com)
+
 an opinionated event-driven framework for building asynchronous systems on amazon web services.
 
 eventing-framework connects services through a typed event bus built on sns topics, sqs queues, and s3 storage. define domain events, run handlers when they arrive, and emit new events from anywhere in your code. the framework handles publishing, polling, oversized payloads, and s3 reference resolution behind the scenes.
 
 - typed domain events with per-service base classes
 - transparent oversized payload routing (inline or s3 reference)
-- error isolation — a failing handler doesn't block the rest of the batch
+- error isolation - a failing handler doesn't block the rest of the batch
 - zero dependencies beyond the aws sdk
 
 eventing-framework lets your services communicate without coupling. publish what happened. subscribe to what matters.
@@ -34,14 +39,14 @@ class OrderEvent<PayloadType = Record<string, unknown>> extends DomainEvent {
   }
 }
 
-class OrderPlaced extends OrderEvent<{ orderId: string; total: number }> {
-  constructor(payload: { orderId: string; total: number }) {
+class OrderPlaced extends OrderEvent<{ id: string; total: number }> {
+  constructor(payload: { id: string; total: number }) {
     super('OrderPlaced', payload);
   }
 }
 
-class OrderProcessed extends OrderEvent<{ orderId: string }> {
-  constructor(payload: { orderId: string }) {
+class OrderProcessed extends OrderEvent<{ id: string }> {
+  constructor(payload: { id: string }) {
     super('OrderProcessed', payload);
   }
 }
@@ -49,7 +54,7 @@ class OrderProcessed extends OrderEvent<{ orderId: string }> {
 
 ### configuring
 
-configure only what your service needs — topic and queue for the publishing side, queue and storage for the consuming side.
+configure only what your service needs, topic and queue for the publishing side, queue and storage for the consuming side.
 
 ```typescript
 import { Application } from 'eventing-framework';
@@ -82,13 +87,13 @@ use a typed event map for auto-typed payloads.
 
 ```typescript
 type AppEvents = {
-  OrderPlaced: { orderId: string; total: number };
-  OrderProcessed: { orderId: string };
+  OrderPlaced: { id: string; total: number };
+  OrderProcessed: { id: string };
 };
 
 const app = new Application<AppEvents>({ ... });
 app.on('OrderPlaced', async (payload) => {
-  console.log(`order ${payload.orderId} for $${payload.total}`);
+  console.log(`order ${payload.id} for $${payload.total}`);
 });
 ```
 
@@ -96,8 +101,8 @@ or use an explicit generic on a bare `Application()`.
 
 ```typescript
 const app = new Application({ ... });
-app.on<{ orderId: string; total: number }>('OrderPlaced', async (payload) => {
-  console.log(`order ${payload.orderId} for $${payload.total}`);
+app.on<{ id: string; total: number }>('OrderPlaced', async (payload) => {
+  console.log(`order ${payload.id} for $${payload.total}`);
 });
 ```
 
@@ -109,17 +114,17 @@ register the event, then emit from anywhere in your process.
 import { EventPublisher } from 'eventing-framework';
 
 app.register('OrderProcessed');
-EventPublisher.emit(new OrderProcessed({ orderId: '123' }));
+EventPublisher.emit(new OrderProcessed({ id: '123' }));
 ```
 
 ### chaining events
 
-a handler can emit the next event in the flow — the chain continues to downstream services without coordination.
+a handler can emit the next event in the flow, the chain continues to downstream services without coordination.
 
 ```typescript
 app.on('OrderPlaced', async (payload) => {
   await processOrder(payload);
-  EventPublisher.emit(new OrderProcessed({ orderId: payload.orderId }));
+  EventPublisher.emit(new OrderProcessed({ id: payload.id }));
 });
 ```
 
@@ -132,26 +137,26 @@ await app.stop();   // stops the scheduler, clears handlers and registrations
 
 ## examples
 
-two working examples against localstack — no aws account needed.
+two working examples against localstack, no aws account needed. see [examples](examples/) for more details.
 
-- **[single event](examples/simple/README.md)** — a publisher and a consumer communicating through a single event type
-- **[multi-step workflow](examples/advanced/README.md)** — four services chained across three event types, with oversized payloads and error handling
+- **[single event](examples/simple/)** - a publisher and a consumer communicating through a single event type
+- **[multi-step workflow](examples/advanced/)** - four services chained across three event types, with oversized payloads and error handling
 
 ## design decisions
 
 ### why sns + sqs + s3
 
-sns handles fan-out to multiple queues. sqs provides at-least-once delivery with visibility timeouts for retry. s3 stores payloads that exceed sns's 256kb message size limit — the framework routes oversized payloads transparently, consumers resolve references without knowing the difference.
+sns handles fan-out to multiple queues. sqs provides at-least-once delivery with visibility timeouts for retry. s3 stores payloads that exceed sns's 256kb message size limit, the framework routes oversized payloads transparently, consumers resolve references without knowing the difference.
 
 ### why EventPublisher is static
 
-events come from handlers, webhooks, scheduled jobs — anywhere. a static emitter avoids threading an `Application` reference through every layer of your code. `EventPublisher.emit()` fires locally, `register()` catches it and publishes to sns.
+events come from handlers, webhooks, scheduled jobs - anywhere. a static emitter avoids threading an `Application` reference through every layer of your code. `EventPublisher.emit()` fires locally, `register()` catches it and publishes to sns.
 
 ### why register() and on() are separate
 
-`register()` controls what leaves the service. `on()` controls what enters. the boundary is explicit — consume without publishing, publish without consuming, or both.
+`register()` controls what leaves the service. `on()` controls what enters. the boundary is explicit; consume without publishing, publish without consuming, or both.
 
-errors in handlers are isolated — one failing handler doesn't block the rest of the batch. the failed message stays in sqs for retry.
+errors in handlers are isolated, one failing handler doesn't block the rest of the batch. the failed message stays in sqs for retry.
 
 ## api reference
 
@@ -198,7 +203,7 @@ type ApplicationConfig = {
 }
 ```
 
-all service configs are optional — configure only what your service needs.
+all service configs are optional, configure only what your service needs.
 
 ### DomainEvent
 
