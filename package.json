@@ -43,7 +43,7 @@
   },
   "scripts": {
     "build": "rm -rf dist && tsup",
-    "ci": "npm run lint && npm run test && npm run build",
+    "ci": "npm ci && npm run lint && npm run test && npm run build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "tsx --test",
