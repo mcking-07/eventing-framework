@@ -1,0 +1,43 @@
+name: publish
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org/
+      - run: npm run ci
+
+      - name: check version
+        id: version_check
+        run: |
+          previous_version=$(npm show . version || echo "0.0.0")
+          current_version=$(node -p "require('./package.json').version")
+
+          if dpkg --compare-versions "$current_version" gt "$previous_version"; then
+            echo "[+] new version detected [$current_version > $previous_version], publishing..."
+            echo "publish=true" >> $GITHUB_OUTPUT
+          else
+            echo "[-] no new version, skipping publishing..."
+            echo "publish=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: publish
+        if: ${{ steps.version_check.outputs.publish == 'true' }}
+        run: npm publish --provenance
