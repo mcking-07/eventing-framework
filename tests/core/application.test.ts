@@ -8,6 +8,20 @@ import { Application, DomainEvent, EventPublisher } from '../../src/core';
 import { EventAlreadyRegistered, QueueConfigUndefined, SchedulerConfigUndefined, StorageConfigUndefined, StorageReferenceUndefined } from '../../src/errors';
 import type { ApplicationConfig } from '../../src/types';
 
+const until = (action: () => boolean, milliseconds: number = 5, maximum: number = 2000) => new Promise<void>((resolve, reject) => {
+  const timer = setInterval(() => {
+    if (action()) {
+      clearInterval(timer);
+      resolve();
+    }
+  }, milliseconds);
+
+  setTimeout(() => {
+    clearInterval(timer);
+    reject(new Error(`timed out after ${maximum} ms`));
+  }, maximum);
+});
+
 describe('Application', () => {
   const sandbox = createSandbox();
   const stubs = {
@@ -114,7 +128,7 @@ describe('Application', () => {
       stubs.sns.resolves({ MessageId: 'test-message-id' });
 
       EventPublisher.emit(new TestableEvent({ key: 'value x. '.repeat(30 * 1024) }));
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await until(() => stubs.s3.calledOnce && stubs.sns.calledOnce);
 
       const s3Command = stubs.s3.getCall(0).args[0];
       const snsCommand = stubs.sns.getCall(0).args[0];
@@ -181,7 +195,7 @@ describe('Application', () => {
       });
 
       await app.start();
-      await new Promise((resolve) => setTimeout(resolve, 20));
+      await until(() => handler.calledOnce);
       await app.stop();
 
       assert.ok(handler.calledOnce);
@@ -208,7 +222,7 @@ describe('Application', () => {
       });
 
       await app.start();
-      await new Promise((resolve) => setTimeout(resolve, 20));
+      await until(() => handler.calledOnce);
       await app.stop();
 
       assert.ok(handler.calledOnce);
@@ -287,10 +301,10 @@ describe('Application', () => {
       });
 
       await app.start();
-      await new Promise((resolve) => setTimeout(resolve, 20));
+      await until(() => handler.calledOnce);
       await app.stop();
 
-      assert.ok(handler.called);
+      assert.ok(handler.calledOnce);
       assert.deepStrictEqual(handler.getCall(0).args[0], { key: 'value' });
     });
 
@@ -344,7 +358,7 @@ describe('Application', () => {
       });
 
       await app.start();
-      await new Promise((resolve) => setTimeout(resolve, 20));
+      await until(() => handler.calledOnce);
       await app.stop();
 
       assert.ok(handler.calledOnce);
@@ -367,7 +381,7 @@ describe('Application', () => {
       });
 
       await app.start();
-      await new Promise((resolve) => setTimeout(resolve, 20));
+      await until(() => stubs.sqs.callCount >= 2);
       await app.stop();
 
       const command = stubs.sqs.getCall(1).args[0];
