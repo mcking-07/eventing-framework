@@ -41,3 +41,5 @@ jobs:
       - name: publish
         if: ${{ steps.version_check.outputs.publish == 'true' }}
         run: npm publish --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
