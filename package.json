@@ -1,6 +1,6 @@
 {
   "name": "eventing-framework",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "an opinionated event-driven framework for building asynchronous systems on aws.",
   "type": "module",
   "main": "./dist/index.cjs",
